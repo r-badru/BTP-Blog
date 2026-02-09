@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Justice in Bristol | Bristol Transport Project</title>
+    <meta name="description" content="When buses don't run, communities suffer. Our research reveals how Bristol's transport gaps create a two-tier city—and what we can do about it.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for visualisations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0a1e 0%, #1a0a2e 50%, #0f0a1e 100%);
+            color: #e2e8f0;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        header {
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 1.5rem 3rem;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tags {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .tag-purple {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .tag-amber {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 span {
+            display: block;
+            background: linear-gradient(90deg, #a78bfa, #f472b6, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meta {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 27, 46, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+        }
+        
+        .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+        
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+        
+        article p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+        }
+        
+        article p.lead {
+            font-size: 1.25rem;
+            color: #e2e8f0;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 3rem 0 1.5rem;
+        }
+        
+        .section-bar {
+            width: 4px;
+            height: 2rem;
+            border-radius: 2px;
+        }
+        
+        .section-bar.red-green {
+            background: linear-gradient(to bottom, #ef4444, #10b981);
+        }
+        
+        .section-bar.amber-purple {
+            background: linear-gradient(to bottom, #f59e0b, #8b5cf6);
+        }
+        
+        .section-bar.purple-pink {
+            background: linear-gradient(to bottom, #8b5cf6, #ec4899);
+        }
+        
+        .section-bar.green-teal {
+            background: linear-gradient(to bottom, #10b981, #14b8a6);
+        }
+        
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: rgba(30, 27, 46, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        
+        .legend-dot.high { background: #ef4444; }
+        .legend-dot.moderate { background: #f59e0b; }
+        .legend-dot.low { background: #10b981; }
+        
+        /* Gap Visual */
+        .gap-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 640px) {
+            .gap-visual {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+        
+        .gap-ward {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        
+        .gap-ward.high {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .gap-ward.low {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .gap-ward-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+        
+        .gap-ward-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+        
+        .gap-ward.high .gap-ward-value { color: #f87171; }
+        .gap-ward.low .gap-ward-value { color: #34d399; }
+        
+        .gap-ward-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        .gap-middle {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .gap-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #a78bfa;
+        }
+        
+        .gap-text {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        
+        /* Quote */
+        blockquote {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 4px solid #8b5cf6;
+            border-radius: 0 1rem 1rem 0;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        blockquote p {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #e2e8f0;
+            margin-bottom: 0.75rem;
+        }
+        
+        blockquote cite {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-style: normal;
+        }
+        
+        /* Community Cards */
+        .community-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .community-card {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .community-card.purple {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(30, 27, 46, 0.5) 100%);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+        
+        .community-card.pink {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(30, 27, 46, 0.5) 100%);
+            border-color: rgba(236, 72, 153, 0.2);
+        }
+        
+        .community-card.amber {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(30, 27, 46, 0.5) 100%);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        
+        .community-card-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .community-card.purple .community-card-icon { background: rgba(139, 92, 246, 0.2); }
+        .community-card.pink .community-card-icon { background: rgba(236, 72, 153, 0.2); }
+        .community-card.amber .community-card-icon { background: rgba(245, 158, 11, 0.2); }
+        
+        .community-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .community-card p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+        
+        /* Recommendations */
+        .recommendations {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .rec-card {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border-left: 4px solid;
+        }
+        
+        .rec-card.immediate {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+        
+        .rec-card.pilot {
+            background: rgba(20, 184, 166, 0.1);
+            border-color: #14b8a6;
+        }
+        
+        .rec-card.structural {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: #06b6d4;
+        }
+        
+        .rec-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .rec-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .rec-card.immediate .rec-number { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .rec-card.pilot .rec-number { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+        .rec-card.structural .rec-number { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+        
+        .rec-title {
+            font-weight: 600;
+        }
+        
+        .rec-card.immediate .rec-title { color: #34d399; }
+        .rec-card.pilot .rec-title { color: #2dd4bf; }
+        .rec-card.structural .rec-title { color: #22d3ee; }
+        
+        .rec-card p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+        
+        /* CTA */
+        .cta-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 46, 0.6) 50%, rgba(245, 158, 11, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+        
+        .cta-box h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-box p {
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+            color: #cbd5e1;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #8b5cf6;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(100, 116, 139, 0.3);
+            color: #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(100, 116, 139, 0.5);
+        }
+        
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        footer strong {
+            color: #94a3b8;
+        }
+        
+        /* Correlations table */
+        .correlation-table {
+            width: 100%;
+            margin: 1.5rem 0;
+            border-collapse: collapse;
+        }
+        
+        .correlation-table th,
+        .correlation-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .correlation-table th {
+            color: #a78bfa;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .correlation-table td {
+            color: #cbd5e1;
+        }
+        
+        .correlation-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+        }
+        
+        .correlation-strength {
+            font-size: 0.85rem;
+            color: #a78bfa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="tags">
+                <span class="tag tag-purple">Bristol Transport Project</span>
+                <span class="tag tag-amber">Policy Research</span>
+            </div>
+            
+            <h1>
+                Transport Justice in Bristol:
+                <span>Who Gets Left Behind?</span>
+            </h1>
+            
+            <p class="subtitle">
+                When buses don't run, communities suffer. Our research reveals how Bristol's transport gaps create a two-tier city—and what we can do about it.
+            </p>
+            
+            <p class="meta">
+                By Ruth Badru & the Bristol Transport Project Team • 8 min read
+            </p>
+        </div>
+    </header>
+    
+    <!-- Key Stats -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🗣️</div>
+            <div class="stat-value">180+</div>
+            <div class="stat-label">Community voices heard</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-value">34</div>
+            <div class="stat-label">Bristol wards analysed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔒</div>
+            <div class="stat-value">52%</div>
+            <div class="stat-label">Gap in feeling safe</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-value">15</div>
+            <div class="stat-label">Policy recommendations</div>
+        </div>
+    </section>
+    
+    <main>
+        <article>
+            <p class="lead">
+                Bristol prides itself on sustainability and innovation. Yet beneath the surface, a stark divide exists: residents in some neighbourhoods enjoy frequent, reliable public transport, while others are effectively stranded. We set out to understand this gap—not through assumptions, but by listening to the communities most affected.
+            </p>
+            
+            <p>
+                Through town halls, focus groups, surveys, and a policy symposium with council representatives and transport providers, we co-produced this research with over 180 Bristol residents. The findings reveal transport isn't just about getting from A to B—it's about health, safety, jobs, and belonging.
+            </p>
+            
+            <!-- The Divide Section -->
+            <div class="section-header">
+                <div class="section-bar red-green"></div>
+                <h2>The Divide: Transport Disadvantage Across Bristol</h2>
+            </div>
+            
+            <p>
+                We created a Transport Disadvantage Index combining transport poverty, service coverage, and exclusion factors. The results show a clear pattern: outer estates and peripheral areas face compounded disadvantage.
+            </p>
+            
+            <!-- Gap Visual -->
+            <div class="gap-visual">
+                <div class="gap-ward high">
+                    <div class="gap-ward-name">Hartcliffe & Withywood</div>
+                    <div class="gap-ward-value">85.9%</div>
+                    <div class="gap-ward-label">Highest disadvantage</div>
+                </div>
+                
+                <div class="gap-middle">
+                    <div class="gap-number">64 points</div>
+                    <div class="gap-text">separating Bristol's best<br>and worst-served areas</div>
+                </div>
+                
+                <div class="gap-ward low">
+                    <div class="gap-ward-name">Stoke Bishop</div>
+                    <div class="gap-ward-value">21.7%</div>
+                    <div class="gap-ward-label">Lowest disadvantage</div>
+                </div>
+            </div>
+            
+            <!-- Chart -->
+            <div class="chart-container">
+                <div class="chart-title">Transport Disadvantage Index by Ward</div>
+                <div class="chart-subtitle">Higher scores indicate greater transport challenges</div>
+                <div class="chart-wrapper">
+                    <canvas id="wardChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item"><span class="legend-dot high"></span> High disadvantage (60%+)</div>
+                    <div class="legend-item"><span class="legend-dot moderate"></span> Moderate</div>
+                    <div class="legend-item"><span class="legend-dot low"></span> Low disadvantage</div>
+                </div>
+            </div>
+            
+            <!-- Transport Shapes Everything -->
+            <div class="section-header">
+                <div class="section-bar amber-purple"></div>
+                <h2>Beyond Buses: Transport Shapes Everything</h2>
+            </div>
+            
+            <p>
+                Our analysis uncovered striking connections between transport disadvantage and broader quality of life. These aren't coincidences—they reveal how transport systems either connect or isolate communities.
+            </p>
+            
+            <table class="correlation-table">
+                <thead>
+                    <tr>
+                        <th>What we measured</th>
+                        <th>What we found</th>
+                        <th>Connection strength</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Feeling safe after dark</td>
+                        <td>In areas with poor transport, far fewer people feel safe walking after dark</td>
+                        <td>
+                            <div class="correlation-bar" style="width: 86%"></div>
+                            <span class="correlation-strength">Very strong</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Good health</td>
+                        <td>Transport-poor areas have significantly lower rates of good health</td>
+                        <td>
+                            <div class="correlation-bar" style="width: 79%"></div>
+                            <span class="correlation-strength">Strong</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Food security</td>
+                        <td>Transport difficulties make it harder to access affordable, healthy food</td>
+                        <td>
+                            <div class="correlation-bar" style="width: 72%"></div>
+                            <span class="correlation-strength">Strong</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mental wellbeing</td>
+                        <td>Transport barriers contribute to isolation and poorer mental health</td>
+                        <td>
+                            <div class="correlation-bar" style="width: 59%"></div>
+                            <span class="correlation-strength">Moderate</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <blockquote>
+                <p>"The city can't all be about the Centre… all those bits around the edges get the least service. Until that changes, people have no option but to use cars – and if you don't have a car then you're a bit scuppered, really."</p>
+                <cite>— Town hall participant</cite>
+            </blockquote>
+            
+            <!-- What Communities Want -->
+            <div class="section-header">
+                <div class="section-bar purple-pink"></div>
+                <h2>What Communities Told Us</h2>
+            </div>
+            
+            <div class="community-grid">
+                <div class="community-card purple">
+                    <div class="community-card-icon">💷</div>
+                    <h3>Affordability</h3>
+                    <p>Fares consume up to 2.69% of income in disadvantaged wards. Residents face impossible choices between transport and essentials.</p>
+                </div>
+                
+                <div class="community-card pink">
+                    <div class="community-card-icon">🕐</div>
+                    <h3>Reliability</h3>
+                    <p>Buses that nominally exist but don't run evenings or Sundays create "time-based transport deserts" for shift workers and carers.</p>
+                </div>
+                
+                <div class="community-card amber">
+                    <div class="community-card-icon">🔒</div>
+                    <h3>Safety</h3>
+                    <p>A 52-point gap in feeling safe after dark between best and worst-served areas. Poor transport forces vulnerable journeys.</p>
+                </div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="section-header">
+                <div class="section-bar green-teal"></div>
+                <h2>The Path Forward</h2>
+            </div>
+            
+            <p>
+                Through our policy symposium with WECA, Bristol City Council, and transport operators, we refined community-generated solutions into actionable recommendations across three timeframes:
+            </p>
+            
+            <div class="recommendations">
+                <div class="rec-card immediate">
+                    <div class="rec-header">
+                        <span class="rec-number">1</span>
+                        <span class="rec-title">Immediate: Quick Relief</span>
+                    </div>
+                    <p>Fare caps, emergency service restoration to worst-affected routes, improved real-time information systems.</p>
+                </div>
+                
+                <div class="rec-card pilot">
+                    <div class="rec-header">
+                        <span class="rec-number">2</span>
+                        <span class="rec-title">Medium-term: Pilot Projects</span>
+                    </div>
+                    <p>Demand-responsive transport trials, integrated ticketing pilots, community transport partnerships.</p>
+                </div>
+                
+                <div class="rec-card structural">
+                    <div class="rec-header">
+                        <span class="rec-number">3</span>
+                        <span class="rec-title">Long-term: Structural Reform</span>
+                    </div>
+                    <p>Permanent Transport Inclusion Forum, cross-department planning integration, equity-focused service standards.</p>
+                </div>
+            </div>
+            
+            <!-- CTA -->
+            <div class="cta-box">
+                <h2>This Research Belongs to Bristol</h2>
+                <p>Better transport isn't just about transport. It's about safer, healthier, more connected communities. The evidence is clear. The solutions exist. What's needed now is action.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary">Read the Full Report</a>
+                    <a href="#" class="btn btn-secondary">Contact the Team</a>
+                </div>
+            </div>
+        </article>
+    </main>
+    
+    <footer>
+        <p><strong>Bristol Transport Project</strong> • University of Bristol</p>
+        <p>Funded by UKRI Research England through the Enhancing Research Culture Fund</p>
+        <p style="margin-top: 1rem;">Project Lead: Ruth Badru • Contributors: Yue Yin, Satadru Mukherjee, Dorothea Mueller, Melisa Williams Higgins, Emilia Melville, Clara Rayner</p>
+    </footer>
+    
+    <script>
+        // Ward data for chart
+        const wardData = [
+            { ward: 'Hartcliffe & Withywood', tdi: 85.9, category: 'high' },
+            { ward: 'Lawrence Hill', tdi: 82.8, category: 'high' },
+            { ward: 'Bishopsworth', tdi: 74.8, category: 'high' },
+            { ward: 'Filwood', tdi: 72.1, category: 'high' },
+            { ward: 'Hengrove & Whitchurch', tdi: 71.2, category: 'high' },
+            { ward: 'Stockwood', tdi: 69.3, category: 'moderate' },
+            { ward: 'Easton', tdi: 68.5, category: 'moderate' },
+            { ward: 'Lawrence Weston', tdi: 67.2, category: 'moderate' },
+            { ward: 'Southmead', tdi: 64.9, category: 'moderate' },
+            { ward: 'Clifton Down', tdi: 29.1, category: 'low' },
+            { ward: 'Clifton', tdi: 28.5, category: 'low' },
+            { ward: 'Stoke Bishop', tdi: 21.7, category: 'low' }
+        ];
+        
+        const getColor = (category) => {
+            switch(category) {
+                case 'high': return '#ef4444';
+                case 'moderate': return '#f59e0b';
+                case 'low': return '#10b981';
+                default: return '#6b7280';
+            }
+        };
+        
+        // Create horizontal bar chart
+        const ctx = document.getElementById('wardChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: wardData.map(d => d.ward),
+                datasets: [{
+                    data: wardData.map(d => d.tdi),
+                    backgroundColor: wardData.map(d => getColor(d.category)),
+                    borderRadius: 6,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e1b2e',
+                        titleColor: '#fff',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(148, 163, 184, 0.2)',
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: (context) => `Transport Disadvantage Index: ${context.raw}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        max: 100,
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: (value) => value + '%'
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#e2e8f0',
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
